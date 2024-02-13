@@ -1,0 +1,21 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.form input,
+.form button {
+    margin-bottom: 10px;
+}
+
+.form button {
+    width: 200px;
+}
+
+.form button:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}

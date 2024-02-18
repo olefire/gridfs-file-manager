@@ -28,7 +28,7 @@ import (
 
 func init() {
 	if err := godotenv.Load("app.env"); err != nil {
-		log.Print("No .env file found")
+		log.Print("No app.env file found")
 	}
 }
 
@@ -36,7 +36,7 @@ func main() {
 	ctx := context.Background()
 	cfg, err := config.LoadConfig(".")
 	if err != nil {
-		log.Print("")
+		log.Print("can`t load config")
 	}
 
 	clientOptions := options.Client().ApplyURI(cfg.MongoURL)
@@ -77,7 +77,9 @@ func main() {
 	userController := UserController.NewController(UserController.UserService{UserManagement: userService})
 	fileController := FileController.NewController(FileController.FileService{FileManagement: fileService})
 
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		BodyLimit: 32 * 1024 * 1024,
+	})
 	file, err := os.OpenFile("./app.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		panic(err)

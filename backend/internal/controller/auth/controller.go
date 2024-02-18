@@ -30,8 +30,8 @@ func (ctr *Controller) Signup(c *fiber.Ctx) error {
 	if err := c.BodyParser(&signupBody); err != nil {
 		return utils.InternalServerErrorResponse(c, err)
 	}
-	// validate user input
-	errors := utils.ValidateStruct(signupBody)
+
+	errors := utils.ValidateStruct(&signupBody)
 	if errors != nil {
 		return utils.UnprocessedInputResponse(c, fiber.Map{
 			"errors": errors,

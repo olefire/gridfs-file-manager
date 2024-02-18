@@ -2,6 +2,7 @@ package repostiry
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -27,19 +28,18 @@ func NewUserRepository(col *mongo.Collection) *AuthRepository {
 func (ar *AuthRepository) SignUpUser(ctx context.Context, signupBody *models.SignupBody) (string, error) {
 	var user models.User
 
-	if err := ar.collection.FindOne(context.TODO(), bson.D{{Key: "email", Value: signupBody.Email}}).Decode(&user); err != nil {
-		return "", fmt.Errorf("email already exists: %w", err)
+	if err := ar.collection.FindOne(context.TODO(), bson.D{{Key: "email", Value: signupBody.Email}}).Decode(&user); !errors.Is(err, mongo.ErrNoDocuments) {
+		return "", fmt.Errorf("email already exists")
 	}
 
-	if err := ar.collection.FindOne(ctx, bson.D{{Key: "username", Value: signupBody.Username}}).Decode(&user); err != nil {
-		return "", fmt.Errorf("username already exists: %w", err)
+	if err := ar.collection.FindOne(ctx, bson.D{{Key: "username", Value: signupBody.Username}}).Decode(&user); !errors.Is(err, mongo.ErrNoDocuments) {
+		return "", fmt.Errorf("username already exists")
 	}
 
-	if err := ar.collection.FindOne(ctx, bson.D{{Key: "password", Value: signupBody.Password}}).Decode(user); err != nil {
-		return "", fmt.Errorf("choose another password: %w", err)
+	if err := ar.collection.FindOne(ctx, bson.D{{Key: "password", Value: signupBody.Password}}).Decode(user); !errors.Is(err, mongo.ErrNoDocuments) {
+		return "", fmt.Errorf("choose another password")
 	}
 
-	// save data
 	doc := bson.D{
 		{Key: "name", Value: signupBody.Name},
 		{Key: "email", Value: signupBody.Email},
@@ -76,7 +76,6 @@ func (ar *AuthRepository) SignInUser(ctx context.Context, loginBody *models.Logi
 		return "", fmt.Errorf("incorrect credentials: %w", err)
 	}
 
-	// update user active status
 	updateDoc := bson.M{
 		"$set": bson.M{
 			"isActive": true,
